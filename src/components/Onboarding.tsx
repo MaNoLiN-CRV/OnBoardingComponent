@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,7 +7,7 @@ import {
   Dimensions,
   FlatList,
 } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const { width } = Dimensions.get('window');
 
 export interface Slide {
@@ -23,7 +23,21 @@ interface OnboardingProps {
 
 const OnboardingSwiper = ( { slides, onComplete } : OnboardingProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFirstTime, setIsFirstTime] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const value = await AsyncStorage.getItem('onboarding');
+        if (value === null) {
+          setIsFirstTime(true);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  })
 
   const handleNext = () => {
     if (currentIndex < slides.length - 1) {
@@ -60,6 +74,25 @@ const OnboardingSwiper = ( { slides, onComplete } : OnboardingProps) => {
     }
   }, []);
 
+  const handleGetStarted = async (onComplete: () => void ) => {
+    try {
+      await AsyncStorage.setItem('onboarding', 'true');
+      setIsFirstTime(false);
+      onComplete();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const defaultOnComplete = () => {
+    console.log('Onboarding completed');
+  }
+
+
+
+  if (!isFirstTime) {
+    return null;
+  }
   return (
     <View style={styles.container}>
       <FlatList
@@ -82,7 +115,7 @@ const OnboardingSwiper = ( { slides, onComplete } : OnboardingProps) => {
         ) : (
           <TouchableOpacity 
             style={[styles.button, styles.getStartedButton]} 
-            onPress={onComplete || (() => console.log('Get Started!'))}
+            onPress={() => handleGetStarted(onComplete ?? defaultOnComplete)}
           >
             <Text style={styles.getStartedText}>Get Started</Text>
           </TouchableOpacity>

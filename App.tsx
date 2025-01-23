@@ -78,7 +78,11 @@ function App(): React.JSX.Element {
   
 
   return (
-    <OnboardingSwiper slides={slides}/>
+   
+    <View style={styles.sectionContainer}>
+       <OnboardingSwiper slides={slides}/>
+      <Text style={styles.sectionTitle}>TEST</Text>
+    </View>
   );
 }
 
