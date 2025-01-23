@@ -39,13 +39,13 @@ const OnboardingSwiper = ( { slides, onComplete } : OnboardingProps) => {
     })();
   })
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentIndex < slides.length - 1) {
       flatListRef.current?.scrollToIndex({
         index: currentIndex + 1,
       });
     }
-  };
+  }, [currentIndex, slides.length]);
 
   const Slide = ( item  : Slide) => (
     <View style={[styles.slide, { backgroundColor: item.color }]}>
@@ -74,19 +74,22 @@ const OnboardingSwiper = ( { slides, onComplete } : OnboardingProps) => {
     }
   }, []);
 
-  const handleGetStarted = async (onComplete: () => void ) => {
-    try {
-      await AsyncStorage.setItem('onboarding', 'true');
-      setIsFirstTime(false);
-      onComplete();
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const handleGetStarted = useCallback(
+    async (onComplete: () => void ) => {
+      try {
+        await AsyncStorage.setItem('onboarding', 'true');
+        setIsFirstTime(false);
+        onComplete();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [],
+  );
 
-  const defaultOnComplete = () => {
+  const defaultOnComplete = useCallback(() => {
     console.log('Onboarding completed');
-  }
+  }, []);
 
 
 
